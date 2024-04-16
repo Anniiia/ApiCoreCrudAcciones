@@ -19,8 +19,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Crud Doctores",
-        Description = "Crud Doctores"
+        Title = "Crud Acciones",
+        Description = "Crud Acciones"
     });
 });
 
@@ -28,7 +28,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(options => {
     options.SwaggerEndpoint(url: "/swagger/v1/swagger.json",
-        name: "Api Crud Doctores v1");
+        name: "Api Crud Acciones v1");
     options.RoutePrefix = "";
 });
 
