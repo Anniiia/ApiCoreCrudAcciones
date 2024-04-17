@@ -1,6 +1,7 @@
 ﻿using ApiCoreCrudAcciones.Helpers;
 using ApiCoreCrudAcciones.Models;
 using ApiCoreCrudAcciones.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -18,14 +19,16 @@ namespace ApiCoreCrudAcciones.Controllers
     {
         private RepositoryAcciones repo;
         private HelperAccion helperAccion;
+        private HelperActionServicesOAuth helper;
 
 
-        public AccionGeneralController(RepositoryAcciones repo, HelperAccion helperAccion)
+        public AccionGeneralController(RepositoryAcciones repo, HelperAccion helperAccion, HelperActionServicesOAuth helper)
         {
             this.repo = repo;
             this.helperAccion = helperAccion;
+            this.helper = helper;
         }
-
+        
         [HttpGet]
         public async Task<IActionResult> ListaAcciones()
         {
@@ -48,7 +51,7 @@ namespace ApiCoreCrudAcciones.Controllers
 
             return Ok(acciones); ;
         }
-
+        [Authorize]
         [HttpGet("[action]/{id}")]
         public async Task<ActionResult<Accion>> FindAccion(int id)
         {
@@ -324,40 +327,44 @@ namespace ApiCoreCrudAcciones.Controllers
             }
             else
             {
-                ////DEBEMOS CREAR UNAS CREDENCIALES PARA 
-                ////INCLUIRLAS DENTRO DEL TOKEN Y QUE ESTARAN 
-                ////COMPUESTAS POR EL SECRET KEY CIFRADO Y EL TIPO
-                ////DE CIFRADO QUE DESEEMOS INCLUIR EN EL TOKEN
-                //SigningCredentials credentials =
-                //    new SigningCredentials(
-                //        this.helper.GetKeyToken()
-                //        , SecurityAlgorithms.HmacSha256);
-                ////EL TOKEN SE GENERA CON UNA CLASE Y 
-                ////DEBEMOS INDICAR LOS ELEMENTOS QUE ALMACENARA 
-                ////DENTRO DE DICHO TOKEN, POR EJEMPLO, ISSUER,
-                ////AUDIENCE O EL TIEMPO DE VALIDACION DEL TOKEN
-                //JwtSecurityToken token =
-                //    new JwtSecurityToken(
-                //        issuer: this.helper.Issuer,
-                //        audience: this.helper.Audience,
-                //        signingCredentials: credentials,
-                //        expires: DateTime.UtcNow.AddMinutes(30),
-                //        notBefore: DateTime.UtcNow
-                //        );
-                ////POR ULTIMO, DEVOLVEMOS UNA RESPUESTA AFIRMATIVA
-                ////CON UN OBJETO ANONIMO EN FORMATO JSON
-                //return Ok(
-                //    new
-                //    {
-                //        response =
-                //        new JwtSecurityTokenHandler()
-                //        .WriteToken(token)
-                //    });
 
-                return Ok(usuario);
+                SigningCredentials credentials =
+                    new SigningCredentials(
+                        this.helper.GetKeyToken()
+                        , SecurityAlgorithms.HmacSha256);
+
+                JwtSecurityToken token =
+                    new JwtSecurityToken(
+                        issuer: this.helper.Issuer,
+                        audience: this.helper.Audience,
+                        signingCredentials: credentials,
+                        expires: DateTime.UtcNow.AddMinutes(30),
+                        notBefore: DateTime.UtcNow
+                        );
+
+                return Ok(
+                    new
+                    {
+                        response =
+                        new JwtSecurityTokenHandler()
+                        .WriteToken(token)
+                    });
+
             }
 
         }
+
+        [HttpPost("[action]")]
+
+        public async Task<ActionResult> InsertUsuario(string nombre, string email, string password)
+        { 
+            await this.repo.RegisterUsuarioAsync(nombre, email, password);
+
+            return Ok();
+
+
+        }
+        
 
     }
 }
