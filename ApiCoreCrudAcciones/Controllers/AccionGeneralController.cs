@@ -30,6 +30,7 @@ namespace ApiCoreCrudAcciones.Controllers
         }
         
         [HttpGet]
+        [Route("[action]")]
         public async Task<IActionResult> ListaAcciones()
         {
             //var acciones = this.helperAccion.InsertarAccionDia(url);
@@ -40,7 +41,8 @@ namespace ApiCoreCrudAcciones.Controllers
             return Ok(acciones); ;
         }
 
-        [HttpGet("[action]")]
+        [HttpGet]
+        [Route("[action]")]
         public async Task<IActionResult> ListaAccionesBBDD()
         {
             //this.repo.InsertarAccionDia();
@@ -52,7 +54,8 @@ namespace ApiCoreCrudAcciones.Controllers
             return Ok(acciones); ;
         }
         [Authorize]
-        [HttpGet("[action]/{id}")]
+        [HttpGet]
+        [Route("[action]/{id}")]
         public async Task<ActionResult<Accion>> FindAccion(int id)
         {
             return await this.repo.FindAccionAsync(id);
@@ -69,7 +72,9 @@ namespace ApiCoreCrudAcciones.Controllers
         //{
         //    return await this.repo.numeroComprasAsync(id);
         //}
-        [HttpGet("_TotalGanancias")]
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
         public async Task<ActionResult<double>> GetTotalGanancias()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -78,7 +83,9 @@ namespace ApiCoreCrudAcciones.Controllers
             return totalGananciasCompras;
         }
 
-        [HttpGet("_TotalInvertido")]
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
         public async Task<ActionResult<double>> GetTotalInvertido()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -87,7 +94,9 @@ namespace ApiCoreCrudAcciones.Controllers
             return totalInvertidoCompras;
         }
 
-        [HttpGet("_ComprasRealizadas")]
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
         public async Task<ActionResult<int>> GetComprasRealizadas()
         {
             // usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -96,7 +105,9 @@ namespace ApiCoreCrudAcciones.Controllers
             return totalNumeroCompras;
         }
 
-        [HttpGet("_TotalAcciones")]
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
         public async Task<ActionResult<int>> GetTotalAcciones()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -105,7 +116,9 @@ namespace ApiCoreCrudAcciones.Controllers
             return totalCompras;
         }
 
-        [HttpGet("Resumen")]
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
         public async Task<ActionResult<double>> GetResumen()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -114,6 +127,7 @@ namespace ApiCoreCrudAcciones.Controllers
             return totalCompras;
         }
         [HttpPost]
+        [Route("[action]")]
         public async Task<ActionResult> PostCompra(Compra compra)
         {
             await this.repo.InsertarCompraAsync(compra.idUsuairo, compra.idAccion, compra.Precio, compra.Cantidad, compra.Total);
@@ -354,7 +368,8 @@ namespace ApiCoreCrudAcciones.Controllers
 
         }
 
-        [HttpPost("[action]")]
+        [HttpPost]
+        [Route("[action]")]
 
         public async Task<ActionResult> InsertUsuario(string nombre, string email, string password)
         { 
