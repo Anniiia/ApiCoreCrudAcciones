@@ -82,7 +82,7 @@ namespace ApiCoreCrudAcciones.Controllers
             string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
 
             Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
-            double totalGananciasCompras = await this.repo.totalComprasAsync(usuario.IdUsuario);
+            double totalGananciasCompras = await this.repo.cantidadComprasAsync(usuario.IdUsuario);
             return totalGananciasCompras;
         }
 
@@ -123,6 +123,19 @@ namespace ApiCoreCrudAcciones.Controllers
             Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
             int totalCompras = await this.repo.cantidadComprasAsync(usuario.IdUsuario);
             return totalCompras;
+        }
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult> GetListadoComprasUser()
+        {
+            string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
+
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+            List<Compra> compras = await this.repo.ListadoComprasUser(usuario.IdUsuario);
+
+            return Ok(compras);
+
         }
 
         [Authorize]

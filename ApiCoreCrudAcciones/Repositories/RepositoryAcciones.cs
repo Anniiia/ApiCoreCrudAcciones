@@ -15,7 +15,7 @@ namespace ApiCoreCrudAcciones.Repositories
 
 
         public RepositoryAcciones(AccionesContext context, HelperAccion helperAccion)
-        { 
+        {
             this.context = context;
             this.helperAccion = helperAccion;
         }
@@ -103,6 +103,16 @@ namespace ApiCoreCrudAcciones.Repositories
             double CantidadTotal = consulta.Sum();
 
             return CantidadTotal;
+        }
+
+        public async Task<List<Compra>> ListadoComprasUser(int idusuario)
+        {
+            var consulta = from datos in this.context.Compras where (datos.idUsuairo == idusuario) select datos;
+
+            List<Compra> compras = await consulta.ToListAsync();
+
+            return compras;
+
         }
 
         public async Task InsertarCompraAsync(int idusuario, int idaccion, double precio, int cantidad, double total)
