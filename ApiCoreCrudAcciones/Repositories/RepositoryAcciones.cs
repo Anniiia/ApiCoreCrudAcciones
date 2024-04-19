@@ -3,6 +3,7 @@ using ApiCoreCrudAcciones.Helpers;
 using ApiCoreCrudAcciones.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Numerics;
 
@@ -176,7 +177,6 @@ namespace ApiCoreCrudAcciones.Repositories
             user.TokenMail = "";
             this.context.Usuarios.Add(user);
             await this.context.SaveChangesAsync();
-
 
         }
 

@@ -402,9 +402,9 @@ namespace ApiCoreCrudAcciones.Controllers
         [HttpPost]
         [Route("[action]")]
 
-        public async Task<ActionResult> InsertUsuario(string nombre, string email, string password)
+        public async Task<ActionResult> InsertUsuario(RegistroModel model)
         {
-            await this.repo.RegisterUsuarioAsync(nombre, email, password);
+            await this.repo.RegisterUsuarioAsync(model.Nombre, model.Email,model.Password);
 
             return Ok();
 
