@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Azure.Security.KeyVault.Secrets;
 
 namespace ApiCoreCrudAcciones.Helpers
 {
@@ -11,15 +12,15 @@ namespace ApiCoreCrudAcciones.Helpers
         public string Audience { get; set; }
         public string SecretKey { get; set; }
 
-        public HelperActionServicesOAuth(IConfiguration configuration)
+        private SecretClient secretClient;
+
+        public HelperActionServicesOAuth(string secretKey, string audience, string issuer)
         {
-            this.Issuer =
-                configuration.GetValue<string>("ApiOAuth:Issuer");
-            this.Audience =
-                configuration.GetValue<string>("ApiOAuth:Audience");
-            this.SecretKey =
-                configuration.GetValue<string>("ApiOAuth:SecretKey");
+            this.Issuer = issuer;
+            this.Audience = audience;
+            this.SecretKey = secretKey;
         }
+
 
         public SymmetricSecurityKey GetKeyToken()
         {
