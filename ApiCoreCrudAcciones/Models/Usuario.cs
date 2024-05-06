@@ -31,5 +31,6 @@ namespace ApiCoreCrudAcciones.Models
 
         [Column("TOKENMAIL")]
         public string TokenMail { get; set; }
+    
     }
 }
