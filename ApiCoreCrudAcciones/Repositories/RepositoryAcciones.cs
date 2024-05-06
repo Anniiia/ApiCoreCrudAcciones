@@ -3,6 +3,7 @@ using ApiCoreCrudAcciones.Helpers;
 using ApiCoreCrudAcciones.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Numerics;
 
@@ -15,7 +16,7 @@ namespace ApiCoreCrudAcciones.Repositories
 
 
         public RepositoryAcciones(AccionesContext context, HelperAccion helperAccion)
-        { 
+        {
             this.context = context;
             this.helperAccion = helperAccion;
         }
@@ -105,6 +106,16 @@ namespace ApiCoreCrudAcciones.Repositories
             return CantidadTotal;
         }
 
+        public async Task<List<Compra>> ListadoComprasUser(int idusuario)
+        {
+            var consulta = from datos in this.context.Compras where (datos.idUsuairo == idusuario) select datos;
+
+            List<Compra> compras = await consulta.ToListAsync();
+
+            return compras;
+
+        }
+
         public async Task InsertarCompraAsync(int idusuario, int idaccion, double precio, int cantidad, double total)
         {
 
@@ -166,7 +177,6 @@ namespace ApiCoreCrudAcciones.Repositories
             user.TokenMail = "";
             this.context.Usuarios.Add(user);
             await this.context.SaveChangesAsync();
-
 
         }
 

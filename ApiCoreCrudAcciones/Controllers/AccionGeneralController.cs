@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Numerics;
 using System.Security.Claims;
@@ -28,7 +29,7 @@ namespace ApiCoreCrudAcciones.Controllers
             this.helperAccion = helperAccion;
             this.helper = helper;
         }
-        
+
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> ListaAcciones()
@@ -48,7 +49,7 @@ namespace ApiCoreCrudAcciones.Controllers
             //this.repo.InsertarAccionDia();
             //var acciones = this.helperAccion.InsertarAccionDia(url);
             List<Accion> acciones = await this.repo.PedirAccionesBBDD();
-            
+
 
 
             return Ok(acciones); ;
@@ -78,8 +79,10 @@ namespace ApiCoreCrudAcciones.Controllers
         public async Task<ActionResult<double>> GetTotalGanancias()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            int usuario = 1;
-            double totalGananciasCompras = await this.repo.totalComprasAsync(usuario);
+            string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
+
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+            double totalGananciasCompras = await this.repo.cantidadComprasAsync(usuario.IdUsuario);
             return totalGananciasCompras;
         }
 
@@ -89,8 +92,10 @@ namespace ApiCoreCrudAcciones.Controllers
         public async Task<ActionResult<double>> GetTotalInvertido()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            int usuario = 1;
-            double totalInvertidoCompras = await this.repo.totalComprasAsync(usuario);
+            string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
+
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+            double totalInvertidoCompras = await this.repo.totalComprasAsync(usuario.IdUsuario);
             return totalInvertidoCompras;
         }
 
@@ -100,8 +105,10 @@ namespace ApiCoreCrudAcciones.Controllers
         public async Task<ActionResult<int>> GetComprasRealizadas()
         {
             // usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            int usuario = 1;
-            int totalNumeroCompras = await this.repo.numeroComprasAsync(usuario);
+            string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
+
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+            int totalNumeroCompras = await this.repo.numeroComprasAsync(usuario.IdUsuario);
             return totalNumeroCompras;
         }
 
@@ -111,9 +118,24 @@ namespace ApiCoreCrudAcciones.Controllers
         public async Task<ActionResult<int>> GetTotalAcciones()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            int usuario = 1;
-            int totalCompras = await this.repo.cantidadComprasAsync(usuario);
+            string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
+
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+            int totalCompras = await this.repo.cantidadComprasAsync(usuario.IdUsuario);
             return totalCompras;
+        }
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult> GetListadoComprasUser()
+        {
+            string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
+
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+            List<Compra> compras = await this.repo.ListadoComprasUser(usuario.IdUsuario);
+
+            return Ok(compras);
+
         }
 
         [Authorize]
@@ -122,8 +144,10 @@ namespace ApiCoreCrudAcciones.Controllers
         public async Task<ActionResult<double>> GetResumen()
         {
             //int usuario = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            int usuario = 1;
-            double totalCompras = await this.repo.totalComprasAsync(usuario);
+            string jsonUsuario = HttpContext.User.FindFirst(x => x.Type == "userData").Value;
+
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+            double totalCompras = await this.repo.totalComprasAsync(usuario.IdUsuario);
             return totalCompras;
         }
         [HttpPost]
@@ -346,9 +370,16 @@ namespace ApiCoreCrudAcciones.Controllers
                     new SigningCredentials(
                         this.helper.GetKeyToken()
                         , SecurityAlgorithms.HmacSha256);
+                string jsonUsuario = JsonConvert.SerializeObject(usuario);
+                //cremoas un array de claims con toda la informacion que deseamos guardar en el token
+                Claim[] informacion = new[]
+                {
+                    new Claim("userData", jsonUsuario)
+                };
 
                 JwtSecurityToken token =
                     new JwtSecurityToken(
+                        claims: informacion,
                         issuer: this.helper.Issuer,
                         audience: this.helper.Audience,
                         signingCredentials: credentials,
@@ -371,16 +402,32 @@ namespace ApiCoreCrudAcciones.Controllers
         [HttpPost]
         [Route("[action]")]
 
-        public async Task<ActionResult> InsertUsuario(string nombre, string email, string password)
-        { 
-            await this.repo.RegisterUsuarioAsync(nombre, email, password);
+        public async Task<ActionResult> InsertUsuario(RegistroModel model)
+        {
+            await this.repo.RegisterUsuarioAsync(model.Nombre, model.Email,model.Password);
 
             return Ok();
 
 
         }
-        
 
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<Usuario>> PerfilUsuario()
+        {
+            //internamente, cuando recibimos el token, el usuairo es validado y almacena datos como HttpContext.User.Identity.IsAuthenticated. Como hemos incluido la Key de los claims, automaticamente tambien tenemos dichos claims como en las aplicaciones MCV
+            Claim claim = HttpContext.User.FindFirst(x => x.Type == "userData");
+            //recuperamos el json del empleado 
+            string jsonUsuario = claim.Value;
+            Usuario usuario = JsonConvert.DeserializeObject<Usuario>(jsonUsuario);
+
+            return usuario;
+
+
+
+
+        }
     }
 }
 
